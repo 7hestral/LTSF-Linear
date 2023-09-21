@@ -1,6 +1,6 @@
 from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_Pred
 from torch.utils.data import DataLoader
-
+import torch
 data_dict = {
     'ETTh1': Dataset_ETT_hour,
     'ETTh2': Dataset_ETT_hour,
@@ -51,3 +51,9 @@ def data_provider(args, flag):
         num_workers=args.num_workers,
         drop_last=drop_last)
     return data_set, data_loader
+def run():
+    torch.multiprocessing.freeze_support()
+    print('loop')
+
+if __name__ == '__main__':
+    run()

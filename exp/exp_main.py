@@ -358,3 +358,9 @@ class Exp_Main(Exp_Basic):
         pd.DataFrame(np.append(np.transpose([pred_data.future_dates]), preds[0], axis=1), columns=pred_data.cols).to_csv(folder_path + 'real_prediction.csv', index=False)
 
         return
+def run():
+    torch.multiprocessing.freeze_support()
+    print('loop')
+
+if __name__ == '__main__':
+    run()

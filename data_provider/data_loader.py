@@ -400,3 +400,9 @@ class Dataset_Pred(Dataset):
 
     def inverse_transform(self, data):
         return self.scaler.inverse_transform(data)
+def run():
+    torch.multiprocessing.freeze_support()
+    print('loop')
+
+if __name__ == '__main__':
+    run()

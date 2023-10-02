@@ -1,11 +1,25 @@
-from layer import *
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+from layers.layer import *
 
-
-class gtnet(nn.Module):
-    def __init__(self, gcn_true, buildA_true, gcn_depth, num_nodes, device, predefined_A=None, static_feat=None, dropout=0.3, subgraph_size=20, node_dim=40, dilation_exponential=1, conv_channels=32, residual_channels=32, skip_channels=64, end_channels=128, seq_length=12, in_dim=2, out_dim=12, layers=3, propalpha=0.05, tanhalpha=3, layer_norm_affline=True):
-        super(gtnet, self).__init__()
-        self.gcn_true = gcn_true
-        self.buildA_true = buildA_true
+class Model(nn.Module):
+    def __init__(self, configs, predefined_A=None, static_feat=None, dropout=0.3, subgraph_size=20, node_dim=40, dilation_exponential=1, conv_channels=32, residual_channels=32, skip_channels=64, end_channels=128, seq_length=12, in_dim=1, out_dim=12, layers=3, propalpha=0.05, tanhalpha=3, layer_norm_affline=True):
+        super(Model, self).__init__()
+        # gcn_true = True
+        num_nodes = configs.enc_in
+        subgraph_size = min(num_nodes, 20)
+        node_dim = 40
+        tanhalpha = 3
+        static_feat = None
+        dropout = 0.3
+        propalpha = 0.05
+        gcn_depth = 3
+        out_dim = configs.pred_len
+        self.seq_length = configs.seq_len
+        self.gcn_true = True
+        self.buildA_true = True
         self.num_nodes = num_nodes
         self.dropout = dropout
         self.predefined_A = predefined_A
@@ -19,9 +33,9 @@ class gtnet(nn.Module):
         self.start_conv = nn.Conv2d(in_channels=in_dim,
                                     out_channels=residual_channels,
                                     kernel_size=(1, 1))
-        self.gc = graph_constructor(num_nodes, subgraph_size, node_dim, device, alpha=tanhalpha, static_feat=static_feat)
+        self.gc = graph_constructor(num_nodes, subgraph_size, node_dim, alpha=tanhalpha, static_feat=static_feat)
 
-        self.seq_length = seq_length
+        
         kernel_size = 7
         if dilation_exponential>1:
             self.receptive_field = int(1+(kernel_size-1)*(dilation_exponential**layers-1)/(dilation_exponential-1))
@@ -83,10 +97,11 @@ class gtnet(nn.Module):
             self.skipE = nn.Conv2d(in_channels=residual_channels, out_channels=skip_channels, kernel_size=(1, 1), bias=True)
 
 
-        self.idx = torch.arange(self.num_nodes).to(device)
+        self.idx = torch.arange(self.num_nodes).cuda()
 
 
     def forward(self, input, idx=None):
+        input = input.permute(0,2,1).unsqueeze(1)
         seq_len = input.size(3)
         assert seq_len==self.seq_length, 'input sequence length not equal to preset sequence length'
 
@@ -106,27 +121,27 @@ class gtnet(nn.Module):
                 adp = self.predefined_A
 
         x = self.start_conv(input)
-        print('start_conv(input).shape:', x.shape)
-        # skip = self.skip0(F.dropout(input, self.dropout, training=self.training))
+        #print('start_conv(input).shape:', x.shape)
+        skip = self.skip0(F.dropout(input, self.dropout, training=self.training))
         for i in range(self.layers):
             print(i, 'round')
-            # residual = x
+            residual = x
             filter = self.filter_convs[i](x)
             filter = torch.tanh(filter)
             gate = self.gate_convs[i](x)
             gate = torch.sigmoid(gate)
             x = filter * gate
             x = F.dropout(x, self.dropout, training=self.training)
-            print('after time dilation', x.shape)
-            # s = x
-            # s = self.skip_convs[i](s)
-            # skip = s + skip
+            #print('after time dilation', x.shape)
+            s = x
+            s = self.skip_convs[i](s)
+            skip = s + skip
             if self.gcn_true:
                 x = self.gconv1[i](x, adp)+self.gconv2[i](x, adp.transpose(1,0))
             else:
                 x = self.residual_convs[i](x)
-            print('after gconv', x.shape)
-            # x = x + residual[:, :, :, -x.size(3):]
+            #print('after gconv', x.shape)
+            x = x + residual[:, :, :, -x.size(3):]
             if idx is None:
                 x = self.norm[i](x,self.idx)
             else:
@@ -139,4 +154,7 @@ class gtnet(nn.Module):
         x = F.relu(skip)
         x = F.relu(self.end_conv_1(x))
         x = self.end_conv_2(x)
+        print("x.shape", x.shape)
+        x = x.squeeze()
+        print("output shape", x.shape)
         return x

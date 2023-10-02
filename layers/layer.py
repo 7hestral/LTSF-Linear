@@ -150,7 +150,7 @@ class dilated_inception(nn.Module):
 
 
 class graph_constructor(nn.Module):
-    def __init__(self, nnodes, k, dim, device, alpha=3, static_feat=None):
+    def __init__(self, nnodes, k, dim, alpha=3, static_feat=None):
         super(graph_constructor, self).__init__()
         self.nnodes = nnodes
         if static_feat is not None:
@@ -163,7 +163,7 @@ class graph_constructor(nn.Module):
             self.lin1 = nn.Linear(dim,dim)
             self.lin2 = nn.Linear(dim,dim)
 
-        self.device = device
+        
         self.k = k
         self.dim = dim
         self.alpha = alpha
@@ -182,7 +182,7 @@ class graph_constructor(nn.Module):
 
         a = torch.mm(nodevec1, nodevec2.transpose(1,0))-torch.mm(nodevec2, nodevec1.transpose(1,0))
         adj = F.relu(torch.tanh(self.alpha*a))
-        mask = torch.zeros(idx.size(0), idx.size(0)).to(self.device)
+        mask = torch.zeros(idx.size(0), idx.size(0)).cuda()
         mask.fill_(float('0'))
         s1,t1 = (adj + torch.rand_like(adj)*0.01).topk(self.k,1)
         mask.scatter_(1,t1,s1.fill_(1))

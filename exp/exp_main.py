@@ -53,6 +53,10 @@ class Exp_Main(Exp_Basic):
     def _select_criterion(self):
         criterion = nn.MSELoss()
         return criterion
+    
+    def _mtgnn_forward(self, model, batch_x):
+        
+        pass
 
     def vali(self, vali_data, vali_loader, criterion):
         total_loss = []

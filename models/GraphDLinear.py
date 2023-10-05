@@ -56,6 +56,9 @@ class Model(nn.Module):
             self.gnn_decomp_lst.append(series_decomp(self.kernel_lst[i]))
 
 
+        # layer norm
+        self.layer_norm = nn.LayerNorm([configs.enc_in, configs.pred_len])
+
 
         # Decompsition Kernel Size
         kernel_size = 25
@@ -120,6 +123,7 @@ class Model(nn.Module):
         else:
             seasonal_output = self.Linear_Seasonal(seasonal_init)
             trend_output = self.Linear_Trend(trend_init)
+        trend_output = self.layer_norm(trend_output)
         adp = self.gc(self.idx)
         # print(seasonal_output.shape)
         print('torch.max(trend_output)', torch.max(trend_output))

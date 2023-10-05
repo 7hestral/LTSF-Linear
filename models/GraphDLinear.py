@@ -110,10 +110,10 @@ class Model(nn.Module):
         # x: [Batch, Input length, Channel]
         seasonal_init, trend_init = self.decompsition(x)
         seasonal_init, trend_init = seasonal_init.permute(0,2,1), trend_init.permute(0,2,1)
-        print('torch.max(trend_init)', torch.max(trend_init))
-        print('torch.min(trend_init)', torch.min(trend_init))
-        print('torch.max(seasonal_init)', torch.max(seasonal_init))
-        print('torch.min(seasonal_init)', torch.min(seasonal_init))
+        # print('torch.max(trend_init)', torch.max(trend_init))
+        # print('torch.min(trend_init)', torch.min(trend_init))
+        # print('torch.max(seasonal_init)', torch.max(seasonal_init))
+        # print('torch.min(seasonal_init)', torch.min(seasonal_init))
         if self.individual:
             seasonal_output = torch.zeros([seasonal_init.size(0),seasonal_init.size(1),self.pred_len],dtype=seasonal_init.dtype).to(seasonal_init.device)
             trend_output = torch.zeros([trend_init.size(0),trend_init.size(1),self.pred_len],dtype=trend_init.dtype).to(trend_init.device)
@@ -126,10 +126,10 @@ class Model(nn.Module):
         trend_output = self.layer_norm(trend_output)
         adp = self.gc(self.idx)
         # print(seasonal_output.shape)
-        print('torch.max(trend_output)', torch.max(trend_output))
-        print('torch.min(trend_output)', torch.min(trend_output))
-        print('torch.max(seasonal_output)', torch.max(seasonal_output))
-        print('torch.min(seasonal_output)', torch.min(seasonal_output))
+        # print('torch.max(trend_output)', torch.max(trend_output))
+        # print('torch.min(trend_output)', torch.min(trend_output))
+        # print('torch.max(seasonal_output)', torch.max(seasonal_output))
+        # print('torch.min(seasonal_output)', torch.min(seasonal_output))
         seasonal_lst = []
         for i in range(len(self.kernel_lst)):
             curr_seasonal, _ = self.gnn_decomp_lst[i](x)
@@ -154,10 +154,10 @@ class Model(nn.Module):
 
         # print('torch.max(trend_output)', torch.max(trend_output))
         # print('torch.min(trend_output)', torch.min(trend_output))
-        print('torch.max(seasonal_output_gconv)', torch.max(seasonal_output_gconv))
-        print('torch.min(seasonal_output_gconv)', torch.min(seasonal_output_gconv))
+        # print('torch.max(seasonal_output_gconv)', torch.max(seasonal_output_gconv))
+        # print('torch.min(seasonal_output_gconv)', torch.min(seasonal_output_gconv))
         # print(seasonal_output.shape)
         # seasonal_output += seasonal_output_gconv
         x = seasonal_output_gconv + trend_output
-        exit(0)
+        # exit(0)
         return x.permute(0,2,1) # to [Batch, Output length, Channel]

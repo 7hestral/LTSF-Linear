@@ -62,6 +62,7 @@ class EarlyStopping:
         self.val_loss_min = val_loss
 
 
+
 class dotdict(dict):
     """dot.notation access to dictionary attributes"""
     __getattr__ = dict.get

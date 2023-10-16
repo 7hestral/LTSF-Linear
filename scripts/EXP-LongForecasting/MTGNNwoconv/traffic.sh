@@ -7,7 +7,7 @@ if [ ! -d "./logs/LongForecasting" ]; then
     mkdir ./logs/LongForecasting
 fi
 seq_len=336
-model_name=DLinear
+model_name=MTGNNLinear_woconv
 
 python -u run_longExp.py \
   --is_training 1 \
@@ -52,7 +52,7 @@ python -u run_longExp.py \
   --enc_in 862 \
   --des 'Exp' \
   --itr 1 --batch_size 16 --learning_rate 0.05   >logs/LongForecasting/$model_name'_'traffic_$seq_len'_'336.log \
-  --checkpoints "/checkpoint/${USER}/${SLURM_JOB_ID}" 
+  --checkpoints "/checkpoint/${USER}/${SLURM_JOB_ID}"
 
 python -u run_longExp.py \
   --is_training 1 \

@@ -21,7 +21,8 @@ python -u run_longExp.py \
   --pred_len 96 \
   --enc_in 21 \
   --des 'Exp' \
-  --itr 1 --batch_size 16  >logs/LongForecasting/$model_name'_'Weather_$seq_len'_'96.log
+  --itr 1 --batch_size 16  >logs/LongForecasting/$model_name'_'Weather_$seq_len'_'96.log \
+  --checkpoints "/checkpoint/${USER}/${SLURM_JOB_ID}"
 
 python -u run_longExp.py \
   --is_training 1 \
@@ -35,7 +36,8 @@ python -u run_longExp.py \
   --pred_len 192 \
   --enc_in 21 \
   --des 'Exp' \
-  --itr 1 --batch_size 16  >logs/LongForecasting/$model_name'_'Weather_$seq_len'_'192.log
+  --itr 1 --batch_size 16  >logs/LongForecasting/$model_name'_'Weather_$seq_len'_'192.log \
+  --checkpoints "/checkpoint/${USER}/${SLURM_JOB_ID}"
 
 python -u run_longExp.py \
   --is_training 1 \

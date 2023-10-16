@@ -1,6 +1,8 @@
 from data_provider.data_loader import Dataset_ETT_hour, Dataset_ETT_minute, Dataset_Custom, Dataset_Pred
 from torch.utils.data import DataLoader
+from torch.utils.data import ConcatDataset
 import torch
+import os
 data_dict = {
     'ETTh1': Dataset_ETT_hour,
     'ETTh2': Dataset_ETT_hour,
@@ -31,19 +33,39 @@ def data_provider(args, flag):
         drop_last = True
         batch_size = args.batch_size
         freq = args.freq
+    
+    if 'ecg' in args.data_path:
+        ds_lst = []
+        for f in os.listdir(os.path.join(args.root_path, args.data_path)):
+            datapath = os.path.join(args.data_path, f)
+            curr_ds = Data(
+                root_path=args.root_path,
+                data_path=datapath,
+                flag=flag,
+                size=[args.seq_len, args.label_len, args.pred_len],
+                features=args.features,
+                target=args.target,
+                timeenc=timeenc,
+                freq=freq,
+                train_only=train_only
+            )
+            ds_lst.append(curr_ds)
+        data_set = ConcatDataset(ds_lst)
+    else:
+        data_set = Data(
+            root_path=args.root_path,
+            data_path=args.data_path,
+            flag=flag,
+            size=[args.seq_len, args.label_len, args.pred_len],
+            features=args.features,
+            target=args.target,
+            timeenc=timeenc,
+            freq=freq,
+            train_only=train_only
+        )
 
-    data_set = Data(
-        root_path=args.root_path,
-        data_path=args.data_path,
-        flag=flag,
-        size=[args.seq_len, args.label_len, args.pred_len],
-        features=args.features,
-        target=args.target,
-        timeenc=timeenc,
-        freq=freq,
-        train_only=train_only
-    )
     print(flag, len(data_set))
+
     data_loader = DataLoader(
         data_set,
         batch_size=batch_size,

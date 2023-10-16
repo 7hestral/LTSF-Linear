@@ -77,7 +77,7 @@ class Model(nn.Module):
         self.gconv1 = nn.ModuleList()
         self.gconv2 = nn.ModuleList()
         self.num_layer = 1
-        self.gconv_in = len(self.kernel_lst) + 1# 1
+        self.gconv_in = len(self.kernel_lst) + 1 + 1# 1
         self.gconv_out = 1
         dropout = 0.3
         propalpha = 0.05
@@ -143,8 +143,9 @@ class Model(nn.Module):
         # seasonal_output_gconv = seasonal_output.unsqueeze(1)
 
         seasonal_lst.append(seasonal_output.unsqueeze(1))
-        for item in seasonal_lst:
-            print(item.shape)
+        seasonal_lst.append(trend_output.unsqueeze(1))
+        # for item in seasonal_lst:
+        #     print(item.shape)
         seasonal_output_gconv = torch.cat(seasonal_lst, dim=1).cuda()
         # print(seasonal_output_gconv.shape)
         
